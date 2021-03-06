@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const { Photo } = require('./index.js');
 
-const NUM_RECORDS = 100000;
+const NUM_RECORDS = 10000;
 
 const randomIntBetween = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1);
@@ -33,7 +33,6 @@ const getHipsum = async (params = { paras: 1 }) => {
   }
 
   const url = `https://hipsum.co/api/?type=hipster-centric&${paramsArray.join('&')}`;
-  console.log(url);
   const data = await get(url);
   return JSON.parse(data);
 };
@@ -43,7 +42,6 @@ const generateData = async () => {
   let photoId = 1;
 
   const data = await getHipsum({ paras: NUM_RECORDS });
-  console.log('data length', data.length);
 
   for (let i = 0; i < NUM_RECORDS; i++) {
     const paragraph = data[i % data.length].replace(/\s+/g, ' ');
@@ -55,6 +53,7 @@ const generateData = async () => {
 
     for (; photoId < limit; photoId++) {
       const description = words[randomIntBetween(0, words.length - 1)];
+
       const image = {
         id: photoId,
         workspaceId: i,
