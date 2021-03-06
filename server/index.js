@@ -37,9 +37,30 @@ app.get('/api/photos/workspace/:workspaceId', async (req, res) => {
   }
 });
 
-
+//curl -X "PUT" -d descriptions="['hipster words','more hipster words']" -d urls="['www.facebook.com','www.example.com']" http://localhost:6001/api/photos/workspace/98
 app.put('/api/photos/workspace/:workspaceId', async (req, res) => {
+  const { workspaceId } = req.params;
+  var {descriptions, urls} = req.body;
 
+  descriptions = JSON.parse(descriptions.replace(/'/g, '\"'));
+  urls = JSON.parse(urls.replace(/'/g, '\"'));
+
+  var photos = [];
+  for (var i = 0; i < descriptions.length; i++) {
+    photos.push({
+      id: i,
+      workspaceId: workspaceId,
+      description: descriptions[i],
+      url: urls[i]
+    })
+  }
+  try {
+    await db.replacePhotosByWorkspaceId(workspaceId, photos);
+    res.sendStatus(200);
+  } catch {
+    console.error(`Error replacing workspace photos`);
+    res.sendStatus(500);
+  }
 })
 
 app.delete('/api/photos/workspace/:workspaceId', async (req, res) => {

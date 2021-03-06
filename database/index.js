@@ -20,10 +20,17 @@ const getPhotoById = async id => await Photo.findOne({ id });
 
 const getPhotosByWorkspaceId = async workspaceId => await Photo.find({ workspaceId }).exec();
 
-//const replacePhotosByWorkspaceId = async
+const deletePhotosByWorkspaceId = async (workspaceId) => await Photo.deleteMany(workspaceId);
 
-const deletePhotosByWorkspaceId = async id => await Photo.deleteMany({ workspaceId: id });
-
+const replacePhotosByWorkspaceId = async (workspaceId, newPhotos) => {
+  try {
+    await deletePhotosByWorkspaceId({ workspaceId });
+    await Photo.create(newPhotos);
+    return(null);
+  } catch {
+    return(new Error('error inserting photos'));
+  }
+}
 
 
 module.exports = {
@@ -31,6 +38,7 @@ module.exports = {
   getAllPhotos,
   getPhotoById,
   getPhotosByWorkspaceId,
-  deletePhotosByWorkspaceId
+  deletePhotosByWorkspaceId,
+  replacePhotosByWorkspaceId
 };
 
