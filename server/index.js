@@ -38,7 +38,6 @@ app.get('/api/photos/workspace/:workspaceId', async (req, res) => {
 });
 
 app.put('/api/photos/workspace/:workspaceId', async (req, res) => {
-  //Test with: curl -X "PUT" -d descriptions="['hipster words','more hipster words']" -d urls="['www.facebook.com','www.example.com']" http://localhost:6001/api/photos/workspace/98
   const { workspaceId } = req.params;
   var {descriptions, urls} = req.body;
 
