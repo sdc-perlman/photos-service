@@ -50,4 +50,38 @@ From within the root directory:
 npm install -g webpack
 npm install
 ```
+## CRUD API
+Endpoint:
+```
+/api/photos/workspace/:workspaceId
+```
 
+### GET
+Returns array of database entries for this workspaceId
+Format of each entry:
+```
+{
+  id: Number,
+  workspaceId: Number,
+  description: String,
+  url: String,
+}
+```
+
+### DELETE
+Will delete all existing entries for the workspaceId
+Example for workspaceId 98:
+```
+curl -X "DELETE" http://localhost:6001/api/photos/workspace/98
+```
+
+### PUT
+
+For an existing workspaceId, will delete all existing entries for the workspaceId and then insert the new ones.
+If the workspaceId does not exist, it will insert these photos for the workspaceId.
+Descriptions and URL's are required.
+
+Example for workspaceId 98:
+```
+curl -X "PUT" -d descriptions="['words','hipster words']" -d urls="['www.photo1.com','www.photo2.com']" http://localhost:6001/api/photos/workspace/98
+```
