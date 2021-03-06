@@ -4,7 +4,7 @@ const fs = require('fs');
 
 const { Photo } = require('./index.js');
 
-const NUM_RECORDS = 10000;
+const NUM_RECORDS = 100;
 
 const randomIntBetween = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
 const capitalize = string => string.charAt(0).toUpperCase() + string.slice(1);

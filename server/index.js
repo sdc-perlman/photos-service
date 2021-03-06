@@ -37,6 +37,22 @@ app.get('/api/photos/workspace/:workspaceId', async (req, res) => {
   }
 });
 
+
+app.put('/api/photos/workspace/:workspaceId', async (req, res) => {
+
+})
+
+app.delete('/api/photos/workspace/:workspaceId', async (req, res) => {
+  const { workspaceId } = req.params;
+  try {
+    await db.deletePhotosByWorkspaceId(workspaceId);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(`Couldn't delete workspaceId ${workspaceId}`);
+    res.sendStatus(500);
+  }
+})
+
 // Fallback to index.html for React Router
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));

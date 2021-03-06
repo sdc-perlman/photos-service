@@ -20,10 +20,17 @@ const getPhotoById = async id => await Photo.findOne({ id });
 
 const getPhotosByWorkspaceId = async workspaceId => await Photo.find({ workspaceId }).exec();
 
+//const replacePhotosByWorkspaceId = async
+
+const deletePhotosByWorkspaceId = async id => await Photo.deleteMany({ workspaceId: id });
+
+
+
 module.exports = {
   Photo,
   getAllPhotos,
   getPhotoById,
   getPhotosByWorkspaceId,
+  deletePhotosByWorkspaceId
 };
 
