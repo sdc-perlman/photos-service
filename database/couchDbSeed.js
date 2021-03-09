@@ -1,7 +1,7 @@
 require('dotenv').config();
 const nano = require('nano')(`http://admin:${process.env.COUCHDB_PW}@localhost:5984`);
 const DB_NAME = 'sdc-perlman-photos';
-const NUM_RECORDS = 10000;
+const NUM_RECORDS = 10000000;
 const PARTITION_SIZE = 1000;
 /*
 CouchDB uses databases that have documents. Each document is an item of data.
@@ -35,13 +35,21 @@ var idToStr = (id) => {
     db = nano.db.use(DB_NAME);
   }
   //Make NUM_RECORDS records
-  for (var i = 0; i < NUM_RECORDS; i++) {
-
-    var partition = (i % PARTITION_SIZE).toString();
-    var idStr = `${partition}:${idToStr(i)}`;
-
+  for (var i = 0; i < Math.floor(NUM_RECORDS/PARTITION_SIZE); i++) {
+    //make an object to insert for this partition
+    var bulk = [];
+    for (var j = 0; j < PARTITION_SIZE; j++) {
+      var partition = (i).toString();
+      var idStr = `${partition}:${idToStr(j)}`;
+      bulk.push({
+        _id: idStr,
+        type: 'workspace'
+      });
+    }
     try {
-      await db.insert({type: 'workspace', _id: idStr});
+      const response = await db.bulk({ docs: bulk })
+      //console.log(response);
+      //await db.insert(bulk);
     } catch(err) {
       console.log(err);
     }
