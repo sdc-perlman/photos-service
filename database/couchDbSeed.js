@@ -2,7 +2,8 @@ require('dotenv').config();
 const nano = require('nano')(`http://admin:${process.env.COUCHDB_PW}@localhost:5984`);
 const DB_NAME = 'sdc-perlman-photos';
 const NUM_RECORDS = 10000000;
-const PARTITION_SIZE = 1000;
+const PARTITION_SIZE = 500;
+const PHOTOS_PER_RECORD = 5;
 /*
 CouchDB uses databases that have documents. Each document is an item of data.
 To think of the documents as different 'tables', use the type field.
@@ -40,11 +41,24 @@ var idToStr = (id) => {
     var bulk = [];
     for (var j = 0; j < PARTITION_SIZE; j++) {
       var partition = (i).toString();
-      var idStr = `${partition}:${idToStr(j)}`;
+      var workspaceId = i * PARTITION_SIZE + j;
+      var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
+      //add document for this workspace
       bulk.push({
-        _id: idStr,
+        _id: workspaceIdStr,
         type: 'workspace'
       });
+      //add documents for this workspace's photos
+      for (var k = 0; k < PHOTOS_PER_RECORD; k++) {
+        var photoId = NUM_RECORDS + workspaceId * PHOTOS_PER_RECORD + k;
+        bulk.push({
+          _id: `${partition}:${idToStr(photoId)}`,
+          type: 'photo',
+          url: 'http://placekitten.com/200/300',
+          description: 'lorem ipsum hipster',
+          workspaceId: workspaceIdStr,
+        })
+      }
     }
     try {
       const response = await db.bulk({ docs: bulk })
@@ -54,6 +68,6 @@ var idToStr = (id) => {
       console.log(err);
     }
   }
-  console.log(`Done inserting ${NUM_RECORDS} records`);
+  console.log(`Done inserting ${NUM_RECORDS} records with ${PHOTOS_PER_RECORD} photos each (${NUM_RECORDS * PHOTOS_PER_RECORD} total)`);
 })();
 
