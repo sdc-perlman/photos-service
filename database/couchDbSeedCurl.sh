@@ -8,6 +8,6 @@ curl -X PUT 'http://admin:breakthroughtheyeti@127.0.0.1:5984/sdc-perlman-photos1
 
 for I in {0..9999}
 do
-  curl --silent -d @insertDocs/$I.json -H "Content-type: application/json" -X POST 'http://admin:breakthroughtheyeti@127.0.0.1:5984/sdc-perlman-photos1/_bulk_docs' >/dev/null
+  curl --silent -d @insertDocs/$I.json -H "Content-type: application/json" -X POST 'http://admin:breakthroughtheyeti@127.0.0.1:5984/sdc-perlman-photos1/_bulk_docs?batch=ok' >/dev/null 
   echo $I
 done

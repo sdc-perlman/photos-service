@@ -35,6 +35,7 @@ var idToStr = (id) => {
 }
 
 (async  () => {
+  var sequentialId = 0;
   //Make NUM_RECORDS records
   for (var i = 0; i < Math.floor(NUM_RECORDS/PARTITION_SIZE); i++) {
     //make an object to insert for this partition
@@ -42,7 +43,8 @@ var idToStr = (id) => {
     var bulkStr = "{ \"docs\": ["
     for (var j = 0; j < PARTITION_SIZE; j++) {
       var partition = (i).toString();
-      var workspaceId = i * PARTITION_SIZE + j;
+      var workspaceId = sequentialId; //i * PARTITION_SIZE + j;
+      sequentialId++;
       var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
       //add document for this workspace
       // bulk.push({
@@ -55,7 +57,8 @@ var idToStr = (id) => {
       })
       //add documents for this workspace's photos
       for (var k = 0; k < PHOTOS_PER_RECORD; k++) {
-        var photoId = NUM_RECORDS + workspaceId * PHOTOS_PER_RECORD + k;
+        var photoId = sequentialId; //NUM_RECORDS + workspaceId * PHOTOS_PER_RECORD + k;
+        sequentialId++;
         // bulk.push({
         //   _id: `${partition}:${idToStr(photoId)}`,
         //   type: 'photo',
