@@ -1,7 +1,12 @@
 var fs = require('fs').promises;
 const NUM_RECORDS = 10000000;
-const PARTITION_SIZE = 1000;
+const PARTITION_SIZE = 500;
 const PHOTOS_PER_RECORD = 5;
+
+//TRY:
+// letting couchdb generate IDs
+// not partitioning
+
 /*
 CouchDB uses databases that have documents. Each document is an item of data.
 To think of the documents as different 'tables', use the type field.
@@ -30,8 +35,7 @@ var objToStr = (obj) => {
 }
 
 var idToStr = (id) => {
-  idStr = id.toString();
-  return '000000000'.slice(0, 9-idStr.length) + idStr;
+  return id.toString(36).padStart(5, '0');
 }
 
 (async  () => {
@@ -46,14 +50,17 @@ var idToStr = (id) => {
       var workspaceId = sequentialId; //i * PARTITION_SIZE + j;
       sequentialId++;
       var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
+      var workspaceIdStr = `${idToStr(workspaceId)}`;
+
       //add document for this workspace
       // bulk.push({
       //   _id: workspaceIdStr,
       //   type: 'workspace'
       // });
       bulkStr += objToStr({
-        _id: workspaceIdStr,
-        type: 'workspace'
+        //_id: workspaceIdStr,
+        type: 'workspace',
+        workspaceId: workspaceIdStr
       })
       //add documents for this workspace's photos
       for (var k = 0; k < PHOTOS_PER_RECORD; k++) {
@@ -67,7 +74,7 @@ var idToStr = (id) => {
         //   workspaceId: workspaceIdStr,
         // })
         bulkStr += objToStr({
-          _id: `${partition}:${idToStr(photoId)}`,
+          //_id: `${partition}:${idToStr(photoId)}`,
           type: 'photo',
           url: 'http://placekitten.com/200/300',
           description: 'lorem ipsum',
