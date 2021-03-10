@@ -1,8 +1,6 @@
-require('dotenv').config();
-const nano = require('nano')(`http://admin:${process.env.COUCHDB_PW}@localhost:5984`);
-const DB_NAME = 'sdc-perlman-photos';
+var fs = require('fs').promises;
 const NUM_RECORDS = 10000000;
-const PARTITION_SIZE = 10000;
+const PARTITION_SIZE = 1000;
 const PHOTOS_PER_RECORD = 5;
 /*
 CouchDB uses databases that have documents. Each document is an item of data.
@@ -21,37 +19,51 @@ Workspaces "collection":
 
 */
 
+var objToStr = (obj) => {
+  var str = "{";
+  for (var i in obj) {
+    str += `"${i.toString()}":"${obj[i].toString()}",`;
+  }
+  str = str.slice(0, -1);
+  str += "},"
+  return str;
+}
+
 var idToStr = (id) => {
   idStr = id.toString();
   return '000000000'.slice(0, 9-idStr.length) + idStr;
 }
 
-
 (async  () => {
-  var db;
-  try {
-    await nano.db.destroy(DB_NAME); //will work if database exists, otherwise will continue
-  } finally {
-    await nano.db.create(DB_NAME, {partitioned: true});
-    db = nano.db.use(DB_NAME);
-  }
   //Make NUM_RECORDS records
   for (var i = 0; i < Math.floor(NUM_RECORDS/PARTITION_SIZE); i++) {
     //make an object to insert for this partition
     var bulk = [];
+    var bulkStr = "{ \"docs\": ["
     for (var j = 0; j < PARTITION_SIZE; j++) {
       var partition = (i).toString();
       var workspaceId = i * PARTITION_SIZE + j;
       var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
       //add document for this workspace
-      bulk.push({
+      // bulk.push({
+      //   _id: workspaceIdStr,
+      //   type: 'workspace'
+      // });
+      bulkStr += objToStr({
         _id: workspaceIdStr,
         type: 'workspace'
-      });
+      })
       //add documents for this workspace's photos
       for (var k = 0; k < PHOTOS_PER_RECORD; k++) {
         var photoId = NUM_RECORDS + workspaceId * PHOTOS_PER_RECORD + k;
-        bulk.push({
+        // bulk.push({
+        //   _id: `${partition}:${idToStr(photoId)}`,
+        //   type: 'photo',
+        //   url: 'http://placekitten.com/200/300',
+        //   description: 'lorem ipsum',
+        //   workspaceId: workspaceIdStr,
+        // })
+        bulkStr += objToStr({
           _id: `${partition}:${idToStr(photoId)}`,
           type: 'photo',
           url: 'http://placekitten.com/200/300',
@@ -60,14 +72,17 @@ var idToStr = (id) => {
         })
       }
     }
+    bulkStr = bulkStr.slice(0, -1)
+    bulkStr += ']}'
     try {
-      const response = await db.bulk({ docs: bulk })
-      //console.log(response);
-      //await db.insert(bulk);
+      // var outputObj = {
+      //   docs: bulk
+      // }
+      await fs.writeFile(`./insertDocs/${partition}.json`, bulkStr);
     } catch(err) {
       console.log(err);
     }
+
   }
   console.log(`Done inserting ${NUM_RECORDS} records with ${PHOTOS_PER_RECORD} photos each (${NUM_RECORDS * PHOTOS_PER_RECORD} total)`);
 })();
-
