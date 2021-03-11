@@ -12,3 +12,4 @@ do
   curl --silent -d @insertDocs/$I.json -H "Content-type: application/json" -X POST 'http://admin:breakthroughtheyeti@127.0.0.1:5984/sdc-perlman-photos1/_bulk_docs?batch=ok' >/dev/null
   echo $I
 done
+

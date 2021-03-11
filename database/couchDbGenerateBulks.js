@@ -1,11 +1,9 @@
 var fs = require('fs').promises;
+var { words } = require('./exampleWords.js');
 const NUM_RECORDS = 10000000;
 const PARTITION_SIZE = 500;
 const PHOTOS_PER_RECORD = 5;
 
-//TRY:
-// letting couchdb generate IDs
-// not partitioning
 
 /*
 CouchDB uses databases that have documents. Each document is an item of data.
@@ -38,8 +36,21 @@ var idToStr = (id) => {
   return id.toString(36).padStart(5, '0');
 }
 
+
+
 (async  () => {
   var sequentialId = 0;
+  words = words.join();
+  words = words.split(" ");
+
+  var getRandomWords = () => {
+    var result = [];
+    for (var i = 0; i < 7; i++) {
+      result.push(words[Math.floor(Math.random() * words.length)]);
+    }
+    return result.join();
+  }
+
   //Make NUM_RECORDS records
   for (var i = 0; i < Math.floor(NUM_RECORDS/PARTITION_SIZE); i++) {
     //make an object to insert for this partition
@@ -49,7 +60,7 @@ var idToStr = (id) => {
       var partition = (i).toString();
       var workspaceId = sequentialId; //i * PARTITION_SIZE + j;
       sequentialId++;
-      var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
+      //var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
       var workspaceIdStr = `${idToStr(workspaceId)}`;
 
       //add document for this workspace
@@ -76,8 +87,8 @@ var idToStr = (id) => {
         bulkStr += objToStr({
           //_id: `${partition}:${idToStr(photoId)}`,
           type: 'photo',
-          url: 'http://placekitten.com/200/300',
-          description: 'lorem ipsum',
+          url: `https://rpt25-photos-service.s3-us-west-1.amazonaws.com/photos/${sequentialId % 100}.jpg`, //'http://placekitten.com/200/300',
+          description: getRandomWords(),
           workspaceId: workspaceIdStr,
         })
       }
