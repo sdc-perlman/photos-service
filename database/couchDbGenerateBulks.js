@@ -60,32 +60,19 @@ var idToStr = (id) => {
       var partition = (i).toString();
       var workspaceId = sequentialId; //i * PARTITION_SIZE + j;
       sequentialId++;
-      //var workspaceIdStr = `${partition}:${idToStr(workspaceId)}`;
       var workspaceIdStr = `${idToStr(workspaceId)}`;
 
-      //add document for this workspace
-      // bulk.push({
-      //   _id: workspaceIdStr,
-      //   type: 'workspace'
-      // });
+
       bulkStr += objToStr({
-        //_id: workspaceIdStr,
         type: 'workspace',
         workspaceId: workspaceIdStr
       })
       //add documents for this workspace's photos
       for (var k = 0; k < PHOTOS_PER_RECORD; k++) {
-        var photoId = sequentialId; //NUM_RECORDS + workspaceId * PHOTOS_PER_RECORD + k;
+        var photoId = sequentialId; 
         sequentialId++;
-        // bulk.push({
-        //   _id: `${partition}:${idToStr(photoId)}`,
-        //   type: 'photo',
-        //   url: 'http://placekitten.com/200/300',
-        //   description: 'lorem ipsum',
-        //   workspaceId: workspaceIdStr,
-        // })
+
         bulkStr += objToStr({
-          //_id: `${partition}:${idToStr(photoId)}`,
           type: 'photo',
           url: `https://rpt25-photos-service.s3-us-west-1.amazonaws.com/photos/${sequentialId % 100}.jpg`, //'http://placekitten.com/200/300',
           description: getRandomWords(),
@@ -96,9 +83,6 @@ var idToStr = (id) => {
     bulkStr = bulkStr.slice(0, -1)
     bulkStr += ']}'
     try {
-      // var outputObj = {
-      //   docs: bulk
-      // }
       await fs.writeFile(`./insertDocs/${partition}.json`, bulkStr);
     } catch(err) {
       console.log(err);

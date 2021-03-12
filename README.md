@@ -30,11 +30,22 @@ An `nvmrc` file is included if using [nvm](https://github.com/creationix/nvm).
 
 ## Development
 
-First time set up:
+For first time setup, will need to run seeding scripts. In /database directory:
 
-Run seeding scripts (mongo must be installed and running)
+Postgres: Need to drop existing db, create db and tables, generate bulk copy files, and then run the copy command. This happens in the commands below. Update your path in pgSeedCopy.sql.
 ```
-npm run seed
+psql -d postgres -f pgSeedInit.sql
+psql -d sdcperlman -f pgSeedTableInit.sql
+node postgresQLSeed.js
+psql -d sdcperlman -f pgSeedCopy.sql
+```
+CouchDB: 
+First update username and password for your local couchDB instance in couchDbSeedCurl.sh.
+Then you'll run the following commands to create the insertDocs files.
+```
+node couchDbGenerateBulks.js
+chmod 777 couchDbSeedCurl.sh
+./couchDbSeedCurl.sh
 ```
 
 Start server

@@ -1,0 +1,2 @@
+COPY workspaces (workspaceId) FROM '/Users/beckygagnon/hackReactor/SDC/photos-service/photos-service/database/pgSeedWorkspaces.sql';
+COPY photos (url, description, workspaceId) FROM '/Users/beckygagnon/hackReactor/SDC/photos-service/photos-service/database/pgSeedPhotos.sql' WITH DELIMITER AS '|';

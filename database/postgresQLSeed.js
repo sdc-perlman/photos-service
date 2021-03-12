@@ -1,7 +1,9 @@
 const NUM_WORKSPACES = 10000000;
 const PHOTOS_PER_WORKSPACE = 5;
 const APPEND_CHUNK_LENGTH = 100;
-const OUTPUT_SQL_FILE = './pgSeed.sql';
+const OUTPUT_SQL_FILE_WORKSPACES = './pgSeedWorkspaces.sql';
+const OUTPUT_SQL_FILE_PHOTOS = './pgSeedPhotos.sql';
+
 
 var fs = require('fs').promises;
 var { words } = require('./exampleWords.js');
@@ -13,20 +15,11 @@ var idToStr = (id) => {
 
 
 (async () => {
-  var seedStr = `
-  CLOSE DATABASE sdcperlman;
-  DROP DATABASE sdcperlman;
-  CREATE DATABASE sdcperlman;
-  CREATE TABLE photos (
-      url varchar(100),
-      description varchar(200),
-      workspaceId varchar(5)
-  );
-  CREATE TABLE workspaces (
-      workspaceId varchar(5)
-  );\n`
-  fs.writeFile(OUTPUT_SQL_FILE, seedStr);
-  seedStr = '';
+  var workspacesSeedStr = '';
+  var photosSeedStr = '';
+  fs.writeFile(OUTPUT_SQL_FILE_WORKSPACES, workspacesSeedStr);
+  fs.writeFile(OUTPUT_SQL_FILE_PHOTOS, photosSeedStr);
+
 
   words = words.join();
   words = words.split(" ");
@@ -45,16 +38,19 @@ var idToStr = (id) => {
     var workspaceId = idToStr(sequentialId);
     sequentialId++;
 
-    seedStr += `INSERT INTO workspaces (workspaceId) VALUES ('${workspaceId}');\n`;
-  
+    //seedStr += `INSERT INTO workspaces (workspaceId) VALUES ('${workspaceId}');\n`;
+    workspacesSeedStr += `${workspaceId}\n`;
     for (var j = 0; j < PHOTOS_PER_WORKSPACE; j++) {
-      seedStr += `INSERT INTO photos (url, description, workspaceId) VALUES ('https://rpt25-photos-service.s3-us-west-1.amazonaws.com/photos/${sequentialId % 100}.jpg', '${getRandomWords()}', '${workspaceId}');\n`;
+      //seedStr += `INSERT INTO photos (url, description, workspaceId) VALUES ('https://rpt25-photos-service.s3-us-west-1.amazonaws.com/photos/${sequentialId % 100}.jpg', '${getRandomWords()}', '${workspaceId}');\n`;
+      photosSeedStr += `https://rpt25-photos-service.s3-us-west-1.amazonaws.com/photos/${sequentialId % 100}.jpg|${getRandomWords()}|${workspaceId}\n`;
       sequentialId++;
     }
     if (sequentialId % APPEND_CHUNK_LENGTH > APPEND_CHUNK_LENGTH - 6) {
       try {
-        await fs.appendFile(OUTPUT_SQL_FILE, seedStr);
-        seedStr = '';
+        await fs.appendFile(OUTPUT_SQL_FILE_WORKSPACES, workspacesSeedStr);
+        await fs.appendFile(OUTPUT_SQL_FILE_PHOTOS, photosSeedStr);
+        workspacesSeedStr = '';
+        photosSeedStr = '';
       } catch (err) {
         console.log('Error writing seed script file', err);
       }
